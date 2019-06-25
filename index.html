@@ -57,20 +57,24 @@
                 source.connect(analyser)
                 draw();
             }
-            
+
             function draw() {
                 // draw 1 time slice per column
                 analyser.getByteFrequencyData(dataArray);
                 for (var y = 0; y < bufferLength; y++) {
                     intensity = dataArray[y];
                     canvasCtx.fillStyle = `rgb(${intensity},${intensity},${intensity})`
-                    canvasCtx.fillRect(canvas.width - 1, canvas.height - y, 1, 1)
+                    canvasCtx.fillRect(canvas.width - 1, canvas.height - mel(y), 1, 1)
                 }
 
                 // shift canvas contents left by 1 pixel
                 canvasCtx.drawImage(canvasCtx.canvas, -1, 0);
 
                 requestAnimationFrame(draw);
+            }
+
+            function mel(f) {
+                return 2595 * Math.log(1 + f / 700) / Math.log(10)
             }
         }
     </script>
