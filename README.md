@@ -9,3 +9,5 @@ If you attempt to create an audioContext outside of the above mechanism, Firefox
 There are a few different ways to draw to canvas. This is something I'd like to learn more about.
 
 The Mel scale is interesting and useful, though I don't fully understand the methodology right now.
+
+on iOS, if you navigate away and back, the stream stops and the page has to be refreshed, even though the stream is still active (even showing the microphone icon in top left)
