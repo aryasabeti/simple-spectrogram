@@ -43,7 +43,7 @@
                 navigator.mediaDevices.getUserMedia({audio: true, video: false}).then(showAudioStream)
             }
 
-            analyser.fftSize = 2048;
+            analyser.fftSize = 2048 * 2; 
             var bufferLength = analyser.frequencyBinCount;
             var dataArray = new Uint8Array(bufferLength);
             var canvas = document.getElementById("spectrogram");
@@ -61,7 +61,7 @@
             function draw() {
                 // draw 1 time slice per column
                 analyser.getByteFrequencyData(dataArray);
-                for (var y = 0; y < bufferLength; y++) {
+                for (var y = 0; y < bufferLength / 2; y++) {
                     intensity = dataArray[y];
                     canvasCtx.fillStyle = `rgb(${intensity},${intensity},${intensity})`
                     canvasCtx.fillRect(canvas.width - 1, canvas.height - mel(y), 1, 1)
