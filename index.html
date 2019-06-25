@@ -17,9 +17,10 @@
                 background: black;
             }
 
-            canvas {
+            canvas#spectrogram {
                 width: 100%;
                 height: 100%;
+                display: none;
             }
         </style>
     </head>
@@ -29,22 +30,17 @@
         <canvas 
             id="spectrogram"
             height="1024"
+            width="1024"
         ></canvas>
     </body>
     <script>
         function spectrogram() {
-            document.querySelector('button').style.display = "none";
             var audioCtx = new(window.AudioContext || window.webkitAudioContext)();
             var analyser = audioCtx.createAnalyser();
             var source;
 
             if (navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia ({audio: true, video: false}).then(
-                    function(stream) {
-                        source = audioCtx.createMediaStreamSource(stream)
-                        source.connect(analyser)
-                    }
-                )
+                navigator.mediaDevices.getUserMedia({audio: true, video: false}).then(showAudioStream)
             }
 
             analyser.fftSize = 2048;
@@ -54,6 +50,14 @@
             var canvasCtx = canvas.getContext("2d");
             canvasCtx.globalCompositeOperation = "source-over";
 
+            function showAudioStream(stream) {
+                document.querySelector('button').style.display = "none";
+                document.querySelector('canvas').style.display = "block";
+                source = audioCtx.createMediaStreamSource(stream)
+                source.connect(analyser)
+                draw();
+            }
+            
             function draw() {
                 // draw 1 time slice per column
                 analyser.getByteFrequencyData(dataArray);
@@ -68,9 +72,6 @@
 
                 requestAnimationFrame(draw);
             }
-
-            draw();   
         }
-        
     </script>
 </html>
