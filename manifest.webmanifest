@@ -2,6 +2,6 @@
     "name": "Simple Spectrogram",
     "short_name": "Spectrogram",
     "background_color": "black",
-    "display": "standalone",
+    "display": "minimal-ui",
     "orientation": "landscape"
 }
