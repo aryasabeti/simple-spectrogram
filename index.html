@@ -54,7 +54,7 @@
                 navigator.mediaDevices.getUserMedia({audio: true, video: false}).then(showAudioStream)
             }
 
-            analyser.fftSize = 2048; 
+            analyser.fftSize = 2048 * 2; 
             var bufferLength = analyser.frequencyBinCount;
             var dataArray = new Uint8Array(bufferLength);
             var canvas = document.getElementById("spectrogram");
