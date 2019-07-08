@@ -1,29 +1,20 @@
 <html>
     <head>
         <script async src="https://www.googletagmanager.com/gtag/js?id=UA-142940552-2"></script>
-        <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'UA-142940552-2');
+        <script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'UA-142940552-2');
         </script>
 
         <title>Spectrogram</title>
         <meta charset="UTF-8"/>
         <link rel="manifest" href="/manifest.webmanifest">
         <style>
-            body {
+            body, button {
                 margin: 0;
                 background: black;
                 width: 100%;
                 height: 100%;
-            }
-            button {
-                width: 100%;
-                height: 100%;
                 color: white;
-                background: black;
-                font-size: 40px;
+                font-size: 3em;
             }
             canvas#spectrogram {
                 width: 100%;
@@ -45,13 +36,14 @@
     </body>
     <script>
         function spectrogram(event) {
-            console.log('Starting spectrogram...')
             var audioCtx = new(window.AudioContext || window.webkitAudioContext)();
             var analyser = audioCtx.createAnalyser();
             var source;
 
             if (navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({audio: true, video: false}).then(showAudioStream)
+                navigator.mediaDevices.getUserMedia({audio: true, video: false})
+                .then(showAudioStream)
+                .catch(showError)
             }
 
             analyser.fftSize = 2048 * 2; 
@@ -59,14 +51,21 @@
             var dataArray = new Uint8Array(bufferLength);
             var canvas = document.getElementById("spectrogram");
             var canvasCtx = canvas.getContext("2d");
+            var startButton = document.querySelector('button')
             canvasCtx.globalCompositeOperation = "source-over";
 
             function showAudioStream(stream) {
-                document.querySelector('button').style.display = "none";
-                document.querySelector('canvas').style.display = "block";
+                startButton.style.display = "none";
+                canvas.style.display = "block";
                 source = audioCtx.createMediaStreamSource(stream)
                 source.connect(analyser)
                 draw();
+            }
+
+            function showError(e) {
+                document.querySelector('button').style.display = "none"
+                canvas.style.display="none"
+                document.body.innerHTML = "Sorry, there was an error: " + e.message
             }
 
             function draw() {
@@ -77,10 +76,8 @@
                     canvasCtx.fillStyle = `rgb(${intensity},${intensity},${intensity})`
                     canvasCtx.fillRect(canvas.width - 1, canvas.height - mel(y), 1, 1)
                 }
-
                 // shift canvas contents left by 1 pixel
                 canvasCtx.drawImage(canvasCtx.canvas, -1, 0);
-
                 requestAnimationFrame(draw);
             }
 
