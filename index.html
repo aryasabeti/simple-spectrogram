@@ -3,7 +3,6 @@
         <script async src="https://www.googletagmanager.com/gtag/js?id=UA-142940552-2"></script>
         <script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'UA-142940552-2');
         </script>
-
         <title>Spectrogram</title>
         <meta charset="UTF-8"/>
         <link rel="manifest" href="/manifest.webmanifest">
@@ -24,10 +23,10 @@
         </style>
     </head>
     <body>
-        <!-- canvas height should match the number of fft bins / 2 -->
         <button
             onclick="spectrogram()"
         >Tap to start</button>
+        <!-- canvas height should match the number of fft bins / 2 -->
         <canvas 
             id="spectrogram"
             height="1024"
@@ -40,10 +39,12 @@
             var analyser = audioCtx.createAnalyser();
             var source;
 
-            if (navigator.mediaDevices.getUserMedia) {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 navigator.mediaDevices.getUserMedia({audio: true, video: false})
                 .then(showAudioStream)
                 .catch(showError)
+            } else {
+                showError({ message: "Microphone isn't supported - iOS users should use Safari" })
             }
 
             analyser.fftSize = 2048 * 2; 
@@ -55,8 +56,8 @@
             canvasCtx.globalCompositeOperation = "source-over";
 
             function showAudioStream(stream) {
-                startButton.style.display = "none";
-                canvas.style.display = "block";
+                document.querySelector('button').style.display = "none";
+                document.querySelector('canvas').style.display = "block";
                 source = audioCtx.createMediaStreamSource(stream)
                 source.connect(analyser)
                 draw();
@@ -64,7 +65,7 @@
 
             function showError(e) {
                 document.querySelector('button').style.display = "none"
-                canvas.style.display="none"
+                document.querySelector('canvas').style.display="none"
                 document.body.innerHTML = "Sorry, there was an error: " + e.message
             }
 
