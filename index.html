@@ -26,7 +26,6 @@
         <button
             onclick="spectrogram()"
         >Tap to start</button>
-        <!-- canvas height should match the number of fft bins / 2 -->
         <canvas 
             id="spectrogram"
             height="1024"
@@ -37,53 +36,52 @@
         function spectrogram(event) {
             var audioCtx = new(window.AudioContext || window.webkitAudioContext)();
             var analyser = audioCtx.createAnalyser();
-            var source;
+            analyser.fftSize = 2048;
+            requestMicrophone();
 
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({audio: true, video: false})
-                .then(showAudioStream)
-                .catch(showError)
-            } else {
-                showError({ message: "Microphone isn't supported - iOS users should use Safari" })
-            }
-
-            analyser.fftSize = 2048 * 2; 
             var bufferLength = analyser.frequencyBinCount;
             var dataArray = new Uint8Array(bufferLength);
-            var canvas = document.getElementById("spectrogram");
-            var canvasCtx = canvas.getContext("2d");
-            var startButton = document.querySelector('button')
-            canvasCtx.globalCompositeOperation = "source-over";
 
-            function showAudioStream(stream) {
-                document.querySelector('button').style.display = "none";
-                document.querySelector('canvas').style.display = "block";
-                source = audioCtx.createMediaStreamSource(stream)
-                source.connect(analyser)
-                draw();
+            var startButton = document.querySelector('button')
+            var canvas = document.querySelector('canvas')
+            var canvasCtx = canvas.getContext("2d");
+
+            function requestMicrophone() {
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia({audio: true, video: false})
+                    .then(start)
+                    .catch(showError)
+                } else {
+                    showError({ message: "Microphone isn't supported - iOS users should use Safari" })
+                }
             }
 
-            function showError(e) {
-                document.querySelector('button').style.display = "none"
-                document.querySelector('canvas').style.display="none"
-                document.body.innerHTML = "Sorry, there was an error: " + e.message
+            function start(stream) {
+                var source = audioCtx.createMediaStreamSource(stream)
+                source.connect(analyser)
+                startButton.style.display = "none";
+                canvas.style.display = "block";
+                
+                draw();
             }
 
             function draw() {
                 // draw 1 time slice per column
                 analyser.getByteFrequencyData(dataArray);
-                for (var y = 0; y < bufferLength / 2; y++) {
+                for (var y = 0; y < bufferLength; y++) {
                     intensity = dataArray[y];
                     canvasCtx.fillStyle = `rgb(${intensity},${intensity},${intensity})`
-                    canvasCtx.fillRect(canvas.width - 1, canvas.height - mel(y), 1, 1)
+                    canvasCtx.fillRect(canvas.width - 1, canvas.height - y, 1, 1)
                 }
                 // shift canvas contents left by 1 pixel
                 canvasCtx.drawImage(canvasCtx.canvas, -1, 0);
                 requestAnimationFrame(draw);
             }
 
-            function mel(f) {
-                return 1127 * Math.log(1 + f / 700)
+            function showError(e) {
+                document.querySelector('button').style.display = "none"
+                document.querySelector('canvas').style.display = "none"
+                document.body.innerHTML = "Sorry, there was an error: " + e.message
             }
         }
     </script>
