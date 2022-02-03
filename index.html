@@ -27,9 +27,10 @@
         <button
             onclick="spectrogram()"
         >Tap to start</button>
+        <!-- 710 comes from (bufferLength/10) * Math.log(bufferLength) which roughly chops canvas at 10kHz -->
         <canvas 
             id="spectrogram"
-            height="1024"
+            height="710"
             width="1024"
         ></canvas>
     </body>
@@ -69,10 +70,15 @@
             function draw() {
                 // draw 1 time slice per column
                 analyser.getByteFrequencyData(dataArray);
-                for (var y = 0; y < bufferLength; y++) {
-                    intensity = dataArray[y];
+                for (var y = 1; y <= bufferLength; y++) {
+                    var intensity = dataArray[y - 1];
                     canvasCtx.fillStyle = `rgb(${intensity},${intensity},${intensity})`
-                    canvasCtx.fillRect(canvas.width - 1, canvas.height - y, 1, 1)
+
+                    var rectY = canvas.height - (bufferLength/10) * Math.log(y)
+                    var rectYNext = canvas.height - (bufferLength/10) * Math.log(y+1)
+
+                    var rectHeight = rectYNext - rectY
+                    canvasCtx.fillRect(canvas.width - 1, rectY, 1, rectHeight)
                 }
                 // shift canvas contents left by 1 pixel
                 canvasCtx.drawImage(canvasCtx.canvas, -1, 0);
